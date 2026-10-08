@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EVX | Electric Vehicle Performance &amp; Battery Analytics Platform</title>
+    <meta name="description" content="EVX estimates electric vehicle range, energy use, charging time and running cost from battery, motor and vehicle data. Every result comes from equations you can inspect.">
+    <meta name="theme-color" content="#090b0e">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2312301f'/%3E%3Cpath d='M9 9l14 14M23 9L9 23' stroke='%2346d189' stroke-width='3.4' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar app-chrome">
+    <div class="topbar-inner">
+        <a class="brand" href="#/" aria-label="EVX home">
+            <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7"/><path d="M9 9l14 14M23 9L9 23"/></svg>
+            <span class="brand-name">EVX</span>
+            <span class="brand-sub">Electric Vehicle Performance &amp; Battery Analytics Platform</span>
+        </a>
+        <nav class="topnav" aria-label="Main">
+            <a href="#/" data-nav="home">Home</a>
+            <a href="#/simple/range" data-nav="simple">Simple Mode</a>
+            <a href="#/engineering/overview" data-nav="engineering">Engineering Mode</a>
+            <a href="#/model" data-nav="model">Model and assumptions</a>
+        </nav>
+    </div>
+</header>
+
+<main id="main" tabindex="-1">
+
+<!-- =================================================== HOME -->
+<section class="view" id="view-home" hidden>
+
+    <div class="hero">
+        <div class="wrap hero-grid">
+            <div class="hero-copy">
+                <h1>EV performance and battery analytics, traceable to the equations.</h1>
+                <p class="lead">EVX turns battery, motor and vehicle data into range, energy use, charging time and running cost. Each result comes from an equation you can read, with its assumptions listed beside it.</p>
+                <dl class="spec-strip">
+                    <div><dt>Model level</dt><dd>Simplified engineering model</dd></div>
+                    <div><dt>Units</dt><dd>SI internally</dd></div>
+                    <div><dt>Validation</dt><dd>Not yet validated</dd></div>
+                </dl>
+                <ul class="cap-list" aria-label="Capabilities">
+                    <li>EV performance simulation</li>
+                    <li>Battery analytics</li>
+                    <li>Vehicle modelling</li>
+                    <li>Engineering analysis</li>
+                </ul>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="#/simple/range">Open Simple Mode</a>
+                    <a class="btn btn-ghost" href="#/engineering/overview">Open Engineering Mode</a>
+                </div>
+                <p class="hero-note">Runs locally in your browser. Nothing is uploaded; saved configurations stay on this device.</p>
+            </div>
+
+            <div class="flow-panel" aria-labelledby="flow-title">
+                <div class="flow-head">
+                    <h2 id="flow-title">Where the battery's energy goes</h2>
+                    <p id="flow-sub">Sample scooter, steady speed, flat road</p>
+                </div>
+                <ol class="flow-list" id="home-flow"></ol>
+                <dl class="flow-totals" id="home-totals"></dl>
+                <p class="flow-foot">Calculated live by the EVX engine from a generic sample profile. It is not a real vehicle.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="wrap section">
+        <div class="section-head">
+            <h2>Two ways to work</h2>
+            <p>Both modes run on the same calculation engine, so a number in Simple Mode agrees with the same number in Engineering Mode.</p>
+        </div>
+        <div class="mode-grid">
+            <article class="mode mode-simple">
+                <h3>Simple Mode</h3>
+                <p>For buyers and owners who want practical answers without electrical jargon.</p>
+                <ul class="plain-list">
+                    <li>How far can I go on the charge I have?</li>
+                    <li>Will this trip fit in my battery?</li>
+                    <li>How long will charging take?</li>
+                    <li>What will it cost me per charge, per km and per month?</li>
+                </ul>
+                <a class="btn btn-primary" href="#/simple/range">Start with range</a>
+            </article>
+            <article class="mode mode-eng">
+                <h3>Engineering Mode</h3>
+                <p>For students, engineers and researchers who need to set parameters and inspect the results.</p>
+                <ul class="plain-list">
+                    <li>Edit the full vehicle, motor and battery configuration</li>
+                    <li>See the power flow from battery to wheels, with losses</li>
+                    <li>Run drive-cycle simulations with optional regeneration</li>
+                    <li>Rank parameters by effect, compare configurations, export CSV and a printable report</li>
+                </ul>
+                <a class="btn btn-secondary" href="#/engineering/overview">Open the workbench</a>
+            </article>
+        </div>
+    </div>
+
+    <div class="band">
+        <div class="wrap section">
+            <div class="section-head">
+                <h2>What EVX calculates</h2>
+            </div>
+            <dl class="spec-list">
+                <div><dt>Driving range</dt><dd>Usable energy above your reserve divided by energy use per kilometre, with a spread across speed, load and gradient.</dd></div>
+                <div><dt>Trip energy</dt><dd>Energy for a planned distance, the battery level at arrival, and the margin left, including climbing.</dd></div>
+                <div><dt>Charging</dt><dd>Energy, time and an SOC-versus-time curve, with an optional slowdown at high charge levels.</dd></div>
+                <div><dt>Running cost</dt><dd>Cost per charge, per kilometre and per month from your own tariff and currency.</dd></div>
+                <div><dt>Road load</dt><dd>Rolling resistance, aerodynamic drag, gradient and acceleration forces turned into wheel power.</dd></div>
+                <div><dt>Motor and drivetrain</dt><dd>A loss-based motor model whose efficiency changes with torque and speed, plus drivetrain and controller losses.</dd></div>
+                <div><dt>Battery</dt><dd>Internal resistance, voltage sag under load, I²R loss and SOC tracking by coulomb counting.</dd></div>
+                <div><dt>Drive cycles</dt><dd>Time-stepped speed, power, current and SOC for built-in or pasted speed profiles.</dd></div>
+                <div><dt>Sensitivity</dt><dd>Which parameters move energy use the most, shown as a ranked chart.</dd></div>
+                <div><dt>Export</dt><dd>CSV files for speed sweeps and drive cycles, a JSON configuration file and a print-ready report.</dd></div>
+            </dl>
+        </div>
+    </div>
+
+    <div class="wrap section">
+        <div class="section-head">
+            <h2>How one number is produced</h2>
+            <p>Energy use is worked out backwards from the road to the battery, so every loss is accounted for.</p>
+        </div>
+        <ol class="chain">
+            <li><strong>Road load</strong><span>Rolling, drag and gradient forces at the wheel</span></li>
+            <li><strong>Drivetrain</strong><span>Gear and transmission losses</span></li>
+            <li><strong>Motor</strong><span>Copper, iron and friction losses</span></li>
+            <li><strong>Controller</strong><span>Inverter switching and conduction losses</span></li>
+            <li><strong>Battery</strong><span>Internal resistance, voltage sag and current</span></li>
+        </ol>
+    </div>
+
+    <div class="band">
+        <div class="wrap section">
+            <div class="section-head">
+                <h2>What the estimates are, and are not</h2>
+            </div>
+            <div class="limits">
+                <div>
+                    <h3>What they are</h3>
+                    <p>Simplified engineering-model estimates that respond correctly to speed, mass, gradient, efficiency and battery changes. Each output is labelled with its model level.</p>
+                </div>
+                <div>
+                    <h3>What they are not</h3>
+                    <p>They are not validated against measured vehicles and they are not a guarantee of real-world range. EVX is not a battery management or safety system and does not connect to a vehicle.</p>
+                </div>
+                <div>
+                    <h3>How to get better results</h3>
+                    <p>Replace the sample values with data for your own vehicle. The Model page lists every equation, assumption and limit so you can judge fit for your case.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<!-- =================================================== SIMPLE MODE -->
+<section class="view" id="view-simple" hidden>
+    <div class="wrap">
+        <div class="page-head">
+            <h1>Simple Mode</h1>
+            <p>Describe your vehicle once, then use the four tools. Results are estimates; the assumptions are shown beside each one.</p>
+        </div>
+
+        <nav class="subnav" id="simple-nav" aria-label="Simple Mode tools">
+            <a href="#/simple/range" data-sub="range">Range</a>
+            <a href="#/simple/trip" data-sub="trip">Trip</a>
+            <a href="#/simple/charging" data-sub="charging">Charging</a>
+            <a href="#/simple/cost" data-sub="cost">Cost</a>
+        </nav>
+
+        <div class="split">
+
+            <aside class="panel inputs" aria-labelledby="veh-title">
+                <h2 id="veh-title">Your vehicle</h2>
+
+                <div class="field">
+                    <label for="s-category">Vehicle type</label>
+                    <select id="s-category"></select>
+                    <p class="hint" id="s-profile-note"></p>
+                </div>
+
+                <div class="field-row">
+                    <div class="field">
+                        <label for="s-kwh">Battery energy</label>
+                        <div class="input-unit"><input id="s-kwh" type="number" inputmode="decimal" step="0.1" min="0.1"><span>kWh</span></div>
+                    </div>
+                    <div class="field">
+                        <label for="s-voltage">Battery voltage</label>
+                        <div class="input-unit"><input id="s-voltage" type="number" inputmode="decimal" step="1" min="12"><span>V</span></div>
+                    </div>
+                </div>
+
+                <div class="field-row">
+                    <div class="field">
+                        <label for="s-soc">Current charge</label>
+                        <div class="input-unit"><input id="s-soc" type="number" inputmode="decimal" step="1" min="0" max="100"><span>%</span></div>
+                    </div>
+                    <div class="field">
+                        <label for="s-reserve">Keep in reserve</label>
+                        <div class="input-unit"><input id="s-reserve" type="number" inputmode="decimal" step="1" min="0" max="50"><span>%</span></div>
+                    </div>
+                </div>
+
+                <div class="field-row">
+                    <div class="field">
+                        <label for="s-mass">Vehicle mass</label>
+                        <div class="input-unit"><input id="s-mass" type="number" inputmode="decimal" step="1" min="20"><span>kg</span></div>
+                    </div>
+                    <div class="field">
+                        <label for="s-payload">Rider and load</label>
+                        <div class="input-unit"><input id="s-payload" type="number" inputmode="decimal" step="1" min="0"><span>kg</span></div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="s-cons-mode">Energy use per km comes from</label>
+                    <select id="s-cons-mode">
+                        <option value="model">EVX estimate at a chosen speed</option>
+                        <option value="manual">My own figure</option>
+                    </select>
+                </div>
+
+                <div class="field" id="s-speed-wrap">
+                    <label for="s-speed">Typical speed</label>
+                    <div class="input-unit"><input id="s-speed" type="number" inputmode="decimal" step="1" min="1"><span>km/h</span></div>
+                    <p class="hint" id="s-speed-hint"></p>
+                </div>
+
+                <div class="field" id="s-manual-wrap" hidden>
+                    <label for="s-manual">Energy use</label>
+                    <div class="input-unit"><input id="s-manual" type="number" inputmode="decimal" step="1" min="1"><span>Wh/km</span></div>
+                    <p class="hint">Find it on your vehicle display, or divide the energy used by the distance driven.</p>
+                </div>
+
+                <div class="messages" id="s-messages" role="alert"></div>
+                <button class="btn btn-quiet" type="button" id="s-reset">Reset to sample values</button>
+            </aside>
+
+            <div class="results">
+
+                <!-- RANGE -->
+                <div class="subview" id="sub-simple-range" hidden>
+                    <div class="panel">
+                        <div class="headline-result">
+                            <div>
+                                <span class="result-label">Estimated range</span>
+                                <strong class="result-big"><span id="rng-range">-</span> <small>km</small></strong>
+                            </div>
+                            <dl class="result-side">
+                                <div><dt>Usable energy now</dt><dd><span id="rng-remaining">-</span> kWh</dd></div>
+                                <div><dt>Energy use</dt><dd><span id="rng-consumption">-</span> Wh/km</dd></div>
+                            </dl>
+                        </div>
+                        <p class="source-note" id="rng-source"></p>
+                    </div>
+
+                    <div class="panel">
+                        <h2>Range under different conditions</h2>
+                        <p class="panel-note">Each row changes one thing from your setup. The spread shows how much real driving can move the result.</p>
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead><tr><th scope="col">Condition</th><th scope="col" class="num">Energy use (Wh/km)</th><th scope="col" class="num">Range (km)</th></tr></thead>
+                                <tbody id="rng-scenarios"></tbody>
+                            </table>
+                        </div>
+                        <p class="spread" id="rng-spread"></p>
+                    </div>
+
+                    <div class="panel">
+                        <h2>Range at different charge levels</h2>
+                        <div class="chart-box"><canvas id="chart-rng-soc" aria-label="Range versus state of charge" role="img"></canvas></div>
+                    </div>
+
+                    <div class="panel notes">
+                        <h2>What affects this estimate</h2>
+                        <ul class="plain-list" id="rng-insights"></ul>
+                    </div>
+                </div>
+
+                <!-- TRIP -->
+                <div class="subview" id="sub-simple-trip" hidden>
+                    <div class="panel inputs">
+                        <h2>Plan a trip</h2>
+                        <div class="field-row">
+                            <div class="field">
+                                <label for="t-distance">Trip distance</label>
+                                <div class="input-unit"><input id="t-distance" type="number" inputmode="decimal" step="1" min="1"><span>km</span></div>
+                            </div>
+                            <div class="field">
+                                <label for="t-elevation">Total climb (optional)</label>
+                                <div class="input-unit"><input id="t-elevation" type="number" inputmode="decimal" step="10" min="0"><span>m</span></div>
+                            </div>
+                        </div>
+                        <p class="hint">Uses the charge level and energy use from the panel on the left. Climb adds the energy needed to lift the vehicle; no energy is credited for descents.</p>
+                    </div>
+
+                    <div class="panel">
+                        <div class="verdict" id="t-verdict" role="status"></div>
+                        <dl class="stat-grid">
+                            <div><dt>Energy for the trip</dt><dd><span id="t-energy">-</span> <small>kWh</small></dd></div>
+                            <div><dt>Charge on arrival</dt><dd><span id="t-end">-</span> <small>%</small></dd></div>
+                            <div><dt>Margin above reserve</dt><dd><span id="t-margin">-</span> <small>km</small></dd></div>
+                            <div><dt>Longest trip possible</dt><dd><span id="t-max">-</span> <small>km</small></dd></div>
+                        </dl>
+                        <p class="source-note" id="t-source"></p>
+                    </div>
+
+                    <div class="panel">
+                        <h2>Charge level along the trip</h2>
+                        <div class="chart-box short"><canvas id="chart-trip" aria-label="State of charge along the trip" role="img"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- CHARGING -->
+                <div class="subview" id="sub-simple-charging" hidden>
+                    <div class="panel inputs">
+                        <h2>Plan a charge</h2>
+                        <div class="field-row">
+                            <div class="field">
+                                <label for="c-start">Start charge</label>
+                                <div class="input-unit"><input id="c-start" type="number" inputmode="decimal" step="1" min="0" max="99"><span>%</span></div>
+                            </div>
+                            <div class="field">
+                                <label for="c-target">Target charge</label>
+                                <div class="input-unit"><input id="c-target" type="number" inputmode="decimal" step="1" min="1" max="100"><span>%</span></div>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="c-power">Charger power</label>
+                            <div class="input-unit"><input id="c-power" type="number" inputmode="decimal" step="0.1" min="0.1"><span>kW</span></div>
+                            <div class="chips" id="c-presets" aria-label="Common charger powers">
+                                <button type="button" data-kw="0.5">0.5 kW</button>
+                                <button type="button" data-kw="1.5">1.5 kW</button>
+                                <button type="button" data-kw="3.3">3.3 kW</button>
+                                <button type="button" data-kw="7.4">7.4 kW</button>
+                                <button type="button" data-kw="22">22 kW</button>
+                                <button type="button" data-kw="50">50 kW</button>
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field">
+                                <label for="c-eff">Charging efficiency</label>
+                                <div class="input-unit"><input id="c-eff" type="number" inputmode="decimal" step="1" min="50" max="100"><span>%</span></div>
+                            </div>
+                            <div class="field">
+                                <label for="c-max">Battery charge limit (optional)</label>
+                                <div class="input-unit"><input id="c-max" type="number" inputmode="decimal" step="0.1" min="0"><span>kW</span></div>
+                            </div>
+                        </div>
+                        <label class="check"><input id="c-taper" type="checkbox"> Slow down above 80% (typical of real chargers)</label>
+                    </div>
+
+                    <div class="panel">
+                        <div class="headline-result">
+                            <div>
+                                <span class="result-label">Estimated charging time</span>
+                                <strong class="result-big"><span id="c-time">-</span></strong>
+                            </div>
+                            <dl class="result-side">
+                                <div><dt>Energy into the battery</dt><dd><span id="c-battery">-</span> kWh</dd></div>
+                                <div><dt>Energy from the grid</dt><dd><span id="c-grid">-</span> kWh</dd></div>
+                                <div><dt>Time to reach 80%</dt><dd><span id="c-t80">-</span></dd></div>
+                            </dl>
+                        </div>
+                        <div class="messages" id="c-messages" role="alert"></div>
+                        <p class="source-note">Simplified model. Real charging time also depends on charger limits, battery temperature, the battery management system and the state of the battery.</p>
+                    </div>
+
+                    <div class="panel">
+                        <h2>Charge level over time</h2>
+                        <div class="chart-box short"><canvas id="chart-charge" aria-label="State of charge versus charging time" role="img"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- COST -->
+                <div class="subview" id="sub-simple-cost" hidden>
+                    <div class="panel inputs">
+                        <h2>Electricity cost</h2>
+                        <div class="field-row">
+                            <div class="field">
+                                <label for="k-tariff">Electricity tariff</label>
+                                <div class="input-unit"><input id="k-tariff" type="number" inputmode="decimal" step="0.1" min="0"><span id="k-tariff-unit">per kWh</span></div>
+                            </div>
+                            <div class="field">
+                                <label for="k-currency">Currency</label>
+                                <select id="k-currency"></select>
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field">
+                                <label for="k-monthly">Distance per month</label>
+                                <div class="input-unit"><input id="k-monthly" type="number" inputmode="decimal" step="10" min="0"><span>km</span></div>
+                            </div>
+                            <div class="field">
+                                <label for="k-eff">Charging efficiency</label>
+                                <div class="input-unit"><input id="k-eff" type="number" inputmode="decimal" step="1" min="50" max="100"><span>%</span></div>
+                            </div>
+                        </div>
+                        <p class="hint">Enter the tariff you actually pay. EVX does not assume one. Efficiency covers losses between the wall and the battery.</p>
+                    </div>
+
+                    <div class="panel">
+                        <dl class="stat-grid four">
+                            <div><dt>Cost per kilometre</dt><dd id="k-perkm">-</dd></div>
+                            <div><dt>Cost of this charge</dt><dd id="k-charge">-</dd></div>
+                            <div><dt>Cost of your trip</dt><dd id="k-trip">-</dd></div>
+                            <div><dt>Cost per month</dt><dd id="k-month">-</dd></div>
+                        </dl>
+                        <div class="messages" id="k-messages" role="alert"></div>
+                        <p class="source-note" id="k-source"></p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- =================================================== ENGINEERING MODE -->
+<section class="view" id="view-engineering" hidden>
+    <div class="wrap">
+        <div class="page-head">
+            <h1>Engineering Mode</h1>
+            <p>Model level: simplified engineering model. Inputs are yours, calculated values come from the model, and every assumption is listed under Model and assumptions.</p>
+        </div>
+
+        <ol class="workflow" aria-label="Engineering workflow">
+            <li><a href="#/engineering/vehicle"><b>1</b> Configure vehicle</a></li>
+            <li><a href="#/model"><b>2</b> Review model</a></li>
+            <li><a href="#/engineering/overview"><b>3</b> Simulate</a></li>
+            <li><a href="#/engineering/analytics"><b>4</b> Analyse</a></li>
+        </ol>
+
+        <nav class="subnav" id="eng-nav" aria-label="Engineering Mode sections">
+            <a href="#/engineering/overview" data-sub="overview">Operating point</a>
+            <a href="#/engineering/vehicle" data-sub="vehicle">Vehicle configuration</a>
+            <a href="#/engineering/drive" data-sub="drive">Drive cycle</a>
+            <a href="#/engineering/analytics" data-sub="analytics">Analytics</a>
+            <a href="#/engineering/report" data-sub="report">Reports and export</a>
+        </nav>
+
+        <!-- OPERATING POINT -->
+        <div class="subview" id="sub-engineering-overview" hidden>
+            <div class="sec-head"><span>A</span><h2>Operating-point inputs</h2></div>
+            <div class="panel inputs inline-inputs">
+                <div class="field">
+                    <label for="eng-profile">Vehicle configuration</label>
+                    <select id="eng-profile"></select>
+                </div>
+                <div class="field">
+                    <label for="eng-speed">Vehicle speed</label>
+                    <div class="input-unit"><input id="eng-speed" type="number" inputmode="decimal" step="1" min="1"><span>km/h</span></div>
+                </div>
+                <div class="field">
+                    <label for="eng-grade">Road gradient</label>
+                    <div class="input-unit"><input id="eng-grade" type="number" inputmode="decimal" step="0.5" min="-20" max="30"><span>%</span></div>
+                </div>
+                <div class="field">
+                    <label for="eng-soc">State of charge</label>
+                    <div class="input-unit"><input id="eng-soc" type="number" inputmode="decimal" step="1" min="0" max="100"><span>%</span></div>
+                </div>
+            </div>
+
+            <div class="sec-head"><span>B</span><h2>Simulation</h2></div>
+            <div class="sim-bar">
+                <span class="state state-ready" id="eng-state">Ready</span>
+                <p class="status-line" id="eng-status" role="status" aria-live="polite"></p>
+                <button class="btn btn-primary" type="button" id="eng-run">Run simulation</button>
+            </div>
+
+            <div class="sec-head"><span>C</span><h2>Calculated results</h2></div>
+
+            <div class="legend-line"><span class="tag tag-input">Input</span> set by you <span class="tag tag-calc">Calculated</span> produced by the model <span class="tag tag-assumption">Model assumption</span> fixed in the configuration. Sample configurations hold demonstration values, not measured data.</div>
+            <div class="metric-grid" id="eng-metrics"></div>
+
+            <div class="sec-head"><span>D</span><h2>Power-flow analysis</h2></div>
+            <div class="panel">
+                <ol class="pipeline" id="eng-pipeline" aria-label="Power flow from battery to road load"></ol>
+                <div class="table-wrap"><table class="data-table compact" id="eng-roadload"></table></div>
+            </div>
+
+            <div class="sec-head"><span>E</span><h2>Characteristic curves</h2></div>
+            <div class="chart-grid">
+                <div class="panel"><h2>Power flow at this operating point</h2><div class="chart-box"><canvas id="chart-eng-flow" aria-label="Power flow with losses" role="img"></canvas></div></div>
+                <div class="panel"><h2>Energy use versus speed</h2><div class="chart-box"><canvas id="chart-eng-cons" aria-label="Energy consumption versus speed" role="img"></canvas></div></div>
+                <div class="panel"><h2>Power versus speed</h2><div class="chart-box"><canvas id="chart-eng-power" aria-label="Wheel and battery power versus speed" role="img"></canvas></div></div>
+                <div class="panel"><h2>Efficiency versus speed</h2><div class="chart-box"><canvas id="chart-eng-eff" aria-label="Motor and overall efficiency versus speed" role="img"></canvas></div></div>
+                <div class="panel"><h2>Range versus state of charge</h2><div class="chart-box"><canvas id="chart-eng-range" aria-label="Range versus state of charge at this operating point" role="img"></canvas></div></div>
+            </div>
+
+            <div class="sec-head"><span>F</span><h2>Model assumptions</h2></div>
+            <div class="panel">
+                <h2>Model assumptions in use</h2>
+                <div class="table-wrap"><table class="data-table compact" id="eng-assumptions"></table></div>
+                <p class="source-note">These values come from the active configuration and are held fixed during the calculation. Edit them under Vehicle configuration.</p>
+            </div>
+        </div>
+
+        <!-- VEHICLE CONFIGURATION -->
+        <div class="subview" id="sub-engineering-vehicle" hidden>
+            <div class="panel">
+                <div class="config-bar">
+                    <div class="field">
+                        <label for="veh-profile">Saved configurations</label>
+                        <select id="veh-profile"></select>
+                    </div>
+                    <div class="button-row">
+                        <button class="btn btn-secondary" type="button" id="veh-new">New</button>
+                        <button class="btn btn-secondary" type="button" id="veh-duplicate">Duplicate</button>
+                        <button class="btn btn-secondary" type="button" id="veh-rename">Rename</button>
+                        <button class="btn btn-secondary" type="button" id="veh-delete">Delete</button>
+                    </div>
+                </div>
+                <p class="hint" id="veh-kind"></p>
+            </div>
+
+            <div class="panel">
+                <div class="field-row">
+                    <div class="field">
+                        <label for="veh-name">Configuration name</label>
+                        <input id="veh-name" type="text" maxlength="60">
+                    </div>
+                    <div class="field">
+                        <label for="veh-category">Vehicle category</label>
+                        <select id="veh-category"></select>
+                    </div>
+                </div>
+                <div id="veh-form" class="config-form"></div>
+                <div class="messages" id="veh-messages" role="alert"></div>
+                <div class="button-row">
+                    <button class="btn btn-primary" type="button" id="veh-save">Save configuration</button>
+                    <button class="btn btn-quiet" type="button" id="veh-reset">Restore saved values</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- DRIVE CYCLE -->
+        <div class="subview" id="sub-engineering-drive" hidden>
+            <div class="panel inputs">
+                <h2>Drive-cycle simulation</h2>
+                <p class="panel-note">Time-stepped at 1 second. The speed profile is commanded; if the motor or battery cannot supply it, power is capped and the seconds are counted as a warning. Built-in profiles are illustrative shapes, not standardized test cycles.</p>
+                <div class="field-row three">
+                    <div class="field">
+                        <label for="drv-preset">Speed profile</label>
+                        <select id="drv-preset">
+                            <option value="urban">Urban stop-and-go</option>
+                            <option value="mixed">Mixed urban and cruise</option>
+                            <option value="highway">Steady cruise</option>
+                            <option value="custom">Paste my own</option>
+                        </select>
+                    </div>
+                    <div class="field" id="drv-peak-wrap">
+                        <label for="drv-peak">Peak speed</label>
+                        <div class="input-unit"><input id="drv-peak" type="number" inputmode="decimal" step="1" min="1"><span>km/h</span></div>
+                    </div>
+                    <div class="field" id="drv-repeat-wrap">
+                        <label for="drv-repeats">Repeats</label>
+                        <input id="drv-repeats" type="number" inputmode="numeric" step="1" min="1" max="50">
+                    </div>
+                </div>
+                <div class="field" id="drv-custom-wrap" hidden>
+                    <label for="drv-custom">Speed profile (one km/h value per second, or "time_s, speed_kmh" per line)</label>
+                    <textarea id="drv-custom" rows="6" spellcheck="false" placeholder="0&#10;5&#10;10&#10;15&#10;20"></textarea>
+                </div>
+                <div class="field-row three">
+                    <div class="field">
+                        <label for="drv-grade">Road gradient</label>
+                        <div class="input-unit"><input id="drv-grade" type="number" inputmode="decimal" step="0.5" min="-20" max="30"><span>%</span></div>
+                    </div>
+                    <div class="field">
+                        <label for="drv-soc">Starting charge</label>
+                        <div class="input-unit"><input id="drv-soc" type="number" inputmode="decimal" step="1" min="1" max="100"><span>%</span></div>
+                    </div>
+                    <div class="field field-action">
+                        <label class="check"><input id="drv-regen" type="checkbox"> Regenerative braking</label>
+                    </div>
+                </div>
+                <p class="hint">Regeneration uses the share of braking, power limit and efficiencies in the vehicle configuration. It is off by default because the result depends on those assumptions.</p>
+                <div class="button-row">
+                    <button class="btn btn-primary" type="button" id="drv-run">Run drive cycle</button>
+                    <button class="btn btn-secondary" type="button" id="drv-export">Download CSV</button>
+                    <span class="state state-ready" id="drv-state">Ready</span>
+                </div>
+                <div class="messages" id="drv-messages" role="alert"></div>
+            </div>
+
+            <div id="drv-results" hidden>
+                <div class="metric-grid" id="drv-summary"></div>
+                <div class="chart-grid">
+                    <div class="panel"><h2>Speed</h2><div class="chart-box"><canvas id="chart-drv-speed" aria-label="Speed versus time" role="img"></canvas></div></div>
+                    <div class="panel"><h2>Battery power</h2><div class="chart-box"><canvas id="chart-drv-power" aria-label="Battery power versus time" role="img"></canvas></div></div>
+                    <div class="panel"><h2>Battery current</h2><div class="chart-box"><canvas id="chart-drv-current" aria-label="Battery current versus time" role="img"></canvas></div></div>
+                    <div class="panel"><h2>State of charge</h2><div class="chart-box"><canvas id="chart-drv-soc" aria-label="State of charge versus time" role="img"></canvas></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYTICS -->
+        <div class="subview" id="sub-engineering-analytics" hidden>
+            <div class="panel inputs">
+                <h2>Which parameters matter most</h2>
+                <p class="panel-note">Each parameter is changed by 10% up and down, one at a time, and the change in energy use (Wh/km) is shown. Efficiencies are capped at 100%.</p>
+                <div class="field-row three">
+                    <div class="field">
+                        <label for="ana-speed">Speed</label>
+                        <div class="input-unit"><input id="ana-speed" type="number" inputmode="decimal" step="1" min="1"><span>km/h</span></div>
+                    </div>
+                    <div class="field">
+                        <label for="ana-grade">Gradient</label>
+                        <div class="input-unit"><input id="ana-grade" type="number" inputmode="decimal" step="0.5" min="-20" max="30"><span>%</span></div>
+                    </div>
+                    <div class="field field-action">
+                        <button class="btn btn-primary" type="button" id="ana-run">Update analysis</button>
+                    </div>
+                </div>
+                <div class="messages" id="ana-messages" role="alert"></div>
+            </div>
+            <div class="panel">
+                <h2>Effect on energy use of a 10% change</h2>
+                <div class="chart-box tall"><canvas id="chart-ana-sens" aria-label="Sensitivity of energy consumption to parameters" role="img"></canvas></div>
+                <p class="source-note" id="ana-sens-note"></p>
+            </div>
+
+            <div class="panel inputs">
+                <h2>Compare two configurations</h2>
+                <div class="field-row three">
+                    <div class="field">
+                        <label for="cmp-a">Configuration A</label>
+                        <select id="cmp-a"></select>
+                    </div>
+                    <div class="field">
+                        <label for="cmp-b">Configuration B</label>
+                        <select id="cmp-b"></select>
+                    </div>
+                    <div class="field field-action">
+                        <button class="btn btn-primary" type="button" id="cmp-run">Compare</button>
+                    </div>
+                </div>
+                <div class="messages" id="cmp-messages" role="alert"></div>
+            </div>
+            <div class="panel" id="cmp-results" hidden>
+                <div class="table-wrap">
+                    <table class="data-table" id="cmp-table"></table>
+                </div>
+                <div class="chart-box"><canvas id="chart-cmp" aria-label="Energy consumption versus speed for two configurations" role="img"></canvas></div>
+                <p class="source-note">Compared at the same road gradient as the sensitivity analysis. Differences reflect the parameters entered, not tested vehicles.</p>
+            </div>
+        </div>
+
+        <!-- REPORT -->
+        <div class="subview" id="sub-engineering-report" hidden>
+            <div class="panel app-chrome">
+                <h2>Reports and export</h2>
+                <p class="panel-note">Generate a report for the active configuration, then print it or save it as a PDF from your browser's print dialog. CSV files contain the raw numerical results.</p>
+                <div class="button-row">
+                    <button class="btn btn-primary" type="button" id="rep-generate">Generate report</button>
+                    <button class="btn btn-secondary" type="button" id="rep-print" disabled>Print or save as PDF</button>
+                    <button class="btn btn-secondary" type="button" id="rep-csv-sweep">Download speed sweep CSV</button>
+                    <button class="btn btn-secondary" type="button" id="rep-json">Download configuration JSON</button>
+                </div>
+                <div class="messages" id="rep-messages" role="status"></div>
+            </div>
+            <article class="report-sheet" id="rep-sheet" hidden></article>
+        </div>
+    </div>
+</section>
+
+<!-- =================================================== MODEL PAGE -->
+<section class="view" id="view-model" hidden>
+    <div class="wrap prose">
+        <div class="page-head">
+            <h1>Model and assumptions</h1>
+            <p>Everything EVX calculates, the equations behind it and where it stops being reliable.</p>
+        </div>
+
+        <h2>Symbols and units</h2>
+        <table class="data-table compact">
+            <thead><tr><th scope="col">Symbol</th><th scope="col">Quantity</th><th scope="col">Unit</th></tr></thead>
+            <tbody>
+                <tr><td class="mono">v</td><td>Vehicle speed</td><td>m/s (shown as km/h)</td></tr>
+                <tr><td class="mono">m</td><td>Total mass, vehicle plus payload</td><td>kg</td></tr>
+                <tr><td class="mono">Crr, Cd, A, rho</td><td>Rolling resistance, drag coefficient, frontal area, air density</td><td>-, -, m², kg/m³</td></tr>
+                <tr><td class="mono">theta</td><td>Road angle from gradient</td><td>rad</td></tr>
+                <tr><td class="mono">T, w</td><td>Motor torque, motor speed</td><td>N·m, rad/s</td></tr>
+                <tr><td class="mono">E, R, I</td><td>Battery EMF, internal resistance, current</td><td>V, Ω, A</td></tr>
+                <tr><td class="mono">P</td><td>Power (instantaneous)</td><td>W (shown as kW)</td></tr>
+                <tr><td class="mono">SOC</td><td>State of charge</td><td>% of nominal capacity</td></tr>
+            </tbody>
+        </table>
+
+        <h2>Model level</h2>
+        <table class="data-table compact">
+            <thead><tr><th scope="col">Feature</th><th scope="col">Level</th></tr></thead>
+            <tbody>
+                <tr><td>Range, trip, charging, cost</td><td>Basic estimate (average values and simple energy balance)</td></tr>
+                <tr><td>Road load, powertrain, battery at steady speed</td><td>Simplified engineering model</td></tr>
+                <tr><td>Drive-cycle simulation, sensitivity, comparison</td><td>Parameterized simulation</td></tr>
+                <tr><td>Agreement with measured vehicles</td><td>Not validated</td></tr>
+            </tbody>
+        </table>
+
+        <h2>Calculation methodology</h2>
+        <ol>
+            <li>Read the vehicle configuration and the operating point (speed, gradient, state of charge).</li>
+            <li>Convert to SI units and compute the road-load forces and wheel power.</li>
+            <li>Work backwards through drivetrain, motor and controller to the battery terminal power, adding the auxiliary load.</li>
+            <li>Solve the battery equation for current and terminal voltage, which gives the battery loss.</li>
+            <li>Divide chemical power by speed for energy use, and usable energy by energy use for range.</li>
+            <li>For a drive cycle, repeat steps 2 to 4 every second and integrate current to track SOC.</li>
+        </ol>
+
+        <h2>Road load</h2>
+        <p>At speed <em>v</em>, total tractive force is the sum of four terms, and wheel power is force times speed.</p>
+        <pre>F_roll   = Crr · m · g · cos θ
+F_aero   = ½ · ρ · Cd · A · v²
+F_grade  = m · g · sin θ              θ = atan(gradient / 100)
+F_inert  = m · k · a                  k = rotating mass factor
+P_wheel  = (F_roll + F_aero + F_grade + F_inert) · v</pre>
+
+        <h2>Powertrain</h2>
+        <pre>P_shaft    = P_wheel / eta_drivetrain
+P_motor_in = P_shaft + P_loss(T, w)          (loss model)
+P_terminal = P_motor_in / eta_controller + P_aux
+w = v / r_wheel * gear_ratio                 (motor speed)</pre>
+        <p>The motor loss model splits losses into copper (proportional to torque squared), iron (proportional to speed to the power 1.5) and friction (proportional to speed). Coefficients are set so the total loss at the rated point equals P_rated x (1/eta_rated - 1), divided <span id="split-text"></span>. A flat-efficiency option is also available. The model assumes the motor can hold the commanded torque; field weakening is not modelled in detail, and power available is limited to the peak rating, reduced in proportion to speed below base speed.</p>
+
+        <h2>Battery</h2>
+        <pre>V_terminal = E - I * R
+P_terminal = V_terminal * I
+I = (E - sqrt(E^2 - 4 R P_terminal)) / (2 R)
+P_chemical = E * I = P_terminal + I^2 * R
+dSOC = - I * dt / capacity                   (coulomb counting)</pre>
+        <p>E is the nominal voltage and is held constant. Real packs show a voltage that changes with charge level, temperature and age, none of which is modelled. Negative P_terminal represents regeneration.</p>
+
+        <h2>Range, trip, charging and cost</h2>
+        <pre>Usable energy = (SOC - reserve)/100 * V * Ah
+Range         = usable energy / (Wh per km)
+Trip climb    = m * g * height / chain_efficiency
+Charging      : battery power = charger power * efficiency (linear taper above 80% if enabled)
+Cost per km   = (Wh per km / 1000) / charging_efficiency * tariff</pre>
+
+        <h2>Assumptions you should know about</h2>
+        <ul>
+            <li>Sample profiles are generic and do not describe any real manufacturer's vehicle.</li>
+            <li>Constant battery EMF, constant drivetrain and controller efficiency, no temperature effects.</li>
+            <li>No wind, no tyre pressure effects, no battery ageing. State of health is not estimated.</li>
+            <li>Steady-speed results ignore acceleration; the drive-cycle includes it.</li>
+            <li>Regeneration is optional and depends on the share, power limit and efficiencies you set.</li>
+            <li>The trip estimator credits no energy for descents.</li>
+            <li>Range scenarios use fixed definitions: low, moderate and higher speed are 30%, 50% and 70% of the modelled top speed; light load is no payload; heavy load is the sample's maximum payload; uphill is a 3% gradient.</li>
+            <li>Built-in drive profiles are illustrative and are not WLTP, Indian Driving Cycle or any other standardized test.</li>
+        </ul>
+
+        <h2>Estimated, simulated and measured values</h2>
+        <table class="data-table compact">
+            <thead><tr><th scope="col">Kind</th><th scope="col">Meaning in EVX</th></tr></thead>
+            <tbody>
+                <tr><td><span class="tag tag-input">Input</span></td><td>A value you enter or configure.</td></tr>
+                <tr><td><span class="tag tag-assumption">Model assumption</span></td><td>A value held fixed in the configuration because measured data is not available, such as drag coefficient or drivetrain efficiency.</td></tr>
+                <tr><td><span class="tag tag-calc">Calculated</span></td><td>A value produced by the model from the inputs and assumptions. It is an estimate or simulation result, not a measurement.</td></tr>
+                <tr><td>Measured</td><td>EVX does not import or display measured vehicle data in this version.</td></tr>
+            </tbody>
+        </table>
+
+        <h2>Limitations</h2>
+        <p>EVX is an estimation and learning tool. It is not a battery management system, not a safety monitor and not certified for any regulatory use. It does not read data from a vehicle, so nothing in it is live telemetry. Actual range depends on vehicle design, weather, road, load, battery condition, driving style and control software.</p>
+    </div>
+</section>
+
+</main>
+
+<footer class="footer app-chrome">
+    <div class="wrap footer-inner">
+        <p><strong>EVX</strong> <span id="version-label"></span>. Electric Vehicle Analytics.</p>
+        <p>All results are estimates from a simplified model and may differ from measured vehicle behaviour.</p>
+    </div>
+</footer>
+
+<script src="vendor/chart.umd.js"></script>
+<script src="js/model.js"></script>
+<script src="js/profiles.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
